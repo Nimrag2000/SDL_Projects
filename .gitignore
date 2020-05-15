@@ -14,7 +14,6 @@
 # Compiled Dynamic libraries
 *.so
 *.dylib
-*.dll
 
 # Fortran module files
 *.mod
@@ -23,10 +22,16 @@
 # Compiled Static libraries
 *.lai
 *.la
-*.a
-*.lib
 
 # Executables
 *.exe
 *.out
 *.app
+
+#Studio Files
+*.tlog
+*.vcxproj.user
+Debug/*
+Tutorials/Debug/*
+Tutorials/x64/Debug/*
+.vs/SDL_Projects/v16/*
