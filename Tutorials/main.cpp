@@ -61,9 +61,9 @@ if( 0 > SDL_Init( SDL_INIT_VIDEO ) )
     return( false );
     }
 
-sWindow = SDL_CreateWindow( "Mike's Tutorial", 
-                            SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 
-                            SCREEN_WIDTH, SCREEN_HEIGHT, 
+sWindow = SDL_CreateWindow( "Mike's Tutorial",
+                            SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
+                            SCREEN_WIDTH, SCREEN_HEIGHT,
                             SDL_WINDOW_SHOWN );
 if( nullptr == sWindow )
     {
@@ -98,8 +98,8 @@ return( true );
 PROCEDURE: main
 ----------------------------------------------------------------------------*/
 int main
-    ( 
-    int     argc, 
+    (
+    int     argc,
     char   *args[]
     )
 {
