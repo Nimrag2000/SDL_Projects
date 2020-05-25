@@ -1,7 +1,10 @@
 #include <stdio.h>
 #include <iostream>
+#include <string>
 
 #include "SDL.h"
+
+using namespace std;
 
 /*----------------------------------------------------------------------------
 Local Constants
@@ -10,11 +13,28 @@ Local Constants
 #define SCREEN_HEIGHT   (750)
 
 /*----------------------------------------------------------------------------
+key presses
+-----------------------------------------------------------------------------*/
+enum KeyPressSurfaces
+{
+    KEY_PRESS_SURFACE_DEFAULT,
+    KEY_PRESS_SURFACE_UP,
+    KEY_PRESS_SURFACE_DOWN,
+    KEY_PRESS_SURFACE_LEFT,
+    KEY_PRESS_SURFACE_RIGHT,
+    KEY_PRESS_SURFACE_TOTAL
+};
+
+/*----------------------------------------------------------------------------
 Static Variables
 ----------------------------------------------------------------------------*/
 SDL_Window  *sWindow            = nullptr;
 SDL_Surface *sScreenSurface     = nullptr;
-SDL_Surface *sBMP_EmojiNerd     = nullptr;
+SDL_Surface * sBMP_gogeta       = nullptr;
+SDL_Surface * sBMP_vegeta       = nullptr;
+SDL_Surface * sKeyPressSurfaces[ KEY_PRESS_SURFACE_TOTAL ];
+SDL_Surface * sCurrentSurface   = nullptr; //added
+SDL_Surface * loadSurface( string path );//added
 
 /*----------------------------------------------------------------------------
 Procedures
@@ -29,6 +49,13 @@ static bool init
     void
     );
 
+static bool loadMedia
+(
+    void
+);
+
+
+
 
 /*----------------------------------------------------------------------------
 PROCEDURE: deinit
@@ -38,8 +65,8 @@ static void deinit
     void
     )
 {
-SDL_FreeSurface( sBMP_EmojiNerd );
-sBMP_EmojiNerd = nullptr;
+SDL_FreeSurface(sBMP_gogeta);
+sBMP_gogeta = nullptr;
 
 SDL_DestroyWindow( sWindow );
 sWindow = nullptr;
@@ -84,8 +111,8 @@ static bool loadMedia
     void
     )
 {
-sBMP_EmojiNerd = SDL_LoadBMP( "images/nerd-whatsapp-emoji.bmp" );
-if( nullptr == sBMP_EmojiNerd )
+sBMP_gogeta = SDL_LoadBMP( "images/spriteSheet2.bmp" );
+if( nullptr == sBMP_gogeta )
     {
     return( false );
     }
@@ -104,20 +131,57 @@ int main
     )
 {
 
+bool quit = false;
+SDL_Event e;
+
+SDL_Rect srcRect;
+SDL_Rect dstRect;
+
 if( ( false == init()      ) ||
     ( false == loadMedia() ) )
     {
     return( -1 );
     }
 
-//SDL_FillRect( sScreenSurface, NULL, SDL_MapRGB( sScreenSurface->format, 0x00, 0x00, 0x00 ) );
-//SDL_UpdateWindowSurface( sWindow );
+while( !quit )
+{
+    while( SDL_PollEvent( &e ) != 0 )
+    {
+        if( e.type == SDL_QUIT )
+        {
+            quit = true;
+        }
+        
+    }
 
-SDL_BlitSurface( sBMP_EmojiNerd, NULL, sScreenSurface, NULL );
-SDL_UpdateWindowSurface( sWindow );
 
-SDL_Delay( 2000 );
+SDL_FillRect( sScreenSurface, NULL, SDL_MapRGB( sScreenSurface->format, 0x00, 0x00, 0x00 ) );
+//SDL_SetSurfaceBlendMode( sScreenSurface, SDL_BLENDMODE_BLEND  );
+//SDL_SetSurfaceBlendMode( sBMP_gogeta, SDL_BLENDMODE_BLEND  );
 
+    srcRect.x = 0;
+    srcRect.y = 0;
+    srcRect.w = 40;
+    srcRect.h = 57;
+    
+    dstRect.x = 0;
+    dstRect.y = sScreenSurface->h - srcRect.h;
+    dstRect.w = srcRect.w;
+    dstRect.h = srcRect.h;
+    
+    
+    
+    for( int i = 0; i < 8; i++ )
+    {
+        srcRect.x = i * 40;
+        SDL_BlitSurface(sBMP_gogeta, &srcRect, sScreenSurface, &dstRect);
+        SDL_UpdateWindowSurface( sWindow );
+
+        SDL_Delay( 100 );
+
+
+    }
+}
 deinit();
 
 return( 0 );
