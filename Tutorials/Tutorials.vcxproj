@@ -129,9 +129,11 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="characterClass.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="characterClass.h" />
     <ClInclude Include="sdl-include\begin_code.h" />
     <ClInclude Include="sdl-include\close_code.h" />
     <ClInclude Include="sdl-include\SDL.h" />
