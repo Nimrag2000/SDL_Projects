@@ -9,59 +9,42 @@ using namespace std;
 
 Character::Character( void )
 {
-    mX                  = 0;
-    mY                  = 0;
-    mG                  = 0;
-    mVy                 = 0;
-    mVx                 = 0;
-    mTstartX            = 0;
-    mTstarty            = 0;
-    Uint32 mXstart      = 0;
-    Uint32 mYstart      = 0;
-    mvmntSpeed          = 150;
-    dstRect             = { 0 };
+    mX                  = 0.0;
+    mY                  = 0.0;
+    mG                  = 500.0;
+    mLastX              = 0.0;
+
+    mVy                 = 0.0;
+    mVx                 = 0.0;
+
+    mTstartX            = 0.0;
+    mTstarty            = 0.0;
+    mXstart             = 0.0;
+    mYstart             = 0.0;
+
+    mVxInit             = 150;
+    mVyInit             = -175;
+
     mYlimit             = 750;
     mXlimit             = 750;
+
     mMovingXRight       = false;
     mMovingXLeft        = false;
     mMovingY            = false;
     mIsLeft             = false;
-    mLastAction_id      = ACTION_STILL_RIGHT;
-    SDL_Surface * mSpriteSheet = nullptr;
 
-}
+    mDestRect           = { 0 };
 
-Character::Character( SDL_Surface * spriteSheet )
-{
-    mX                  = 0;
-    mY                  = 0;
-    mG                  = 0;
-    mVy                 = 0;
-    mVx                 = 0;
-    mTstartX            = 0;
-    mTstarty            = 0;
-    Uint32 mXstart      = 0;
-    Uint32 mYstart      = 0;
-    mvmntSpeed          = 150;
-    dstRect             = { 0 };
-    mYlimit             = 750;
-    mXlimit             = 750;
-    mMovingXRight       = false;
-    mMovingXLeft        = false;
-    mMovingY            = false;
-    mIsLeft             = false;
     mLastAction_id      = ACTION_STILL_RIGHT;
-    SDL_Surface * mSpriteSheet = nullptr;
 }
 
 Character::~Character( void )
 {
-
 }
 
-void Character::addActionSprite( action_id_t actionId, SDL_Surface * spriteSheet, int x, int y, int w, int h )
+void Character::addActionSprite( action_id_t actionId, SDL_Texture * spriteTexture, int x, int y, int w, int h )
 {
-    sprite_info_t sprite = { { x, y, w, h }, spriteSheet };
+    sprite_info_t sprite = { { x, y, w, h }, spriteTexture };
 
     mActionSprites[ actionId ].push_back( sprite );
 }
@@ -69,13 +52,10 @@ void Character::addActionSprite( action_id_t actionId, SDL_Surface * spriteSheet
 
 void Character::calcState()
 {
-
-
     double deltaTx = (double)( SDL_GetTicks() - mTstartX ) / 1000.0;
     double deltaTy = (double)( SDL_GetTicks() - mTstarty ) / 1000.0;
     double deltaY = ( mVy * deltaTy ) + 0.5 * mG * ( deltaTy * deltaTy );
 
-    
     
     /*
         calculate movement
@@ -87,7 +67,6 @@ void Character::calcState()
     /*
         pick sprite
     */
-
     if( mMovingXRight && !mMovingY )
     {
         if( mLastAction_id != ACTION_WALK_RIGHT )
@@ -153,12 +132,11 @@ void Character::calcState()
 
     /*
     check for screen boundaries
-*/
+    */
     if( mY > mYlimit )
     {
         mY = mYlimit;
         mVy = 0;
-        mG = 0;
         mYstart = mY;
         mMovingY = false;
     }
@@ -180,9 +158,6 @@ void Character::calcState()
         mMovingXLeft = false;
         mMovingXRight = false;
     }
-
-
-
 }
 
 void Character::handleEvent( const Uint8 * currentKeyState )
@@ -190,17 +165,16 @@ void Character::handleEvent( const Uint8 * currentKeyState )
 
     if( currentKeyState[SDL_SCANCODE_W] && !mMovingY )
     {
-        mVy = -175;
+        mVy = mVyInit;
         mTstarty = SDL_GetTicks();
         mYstart = mY;
-        mG = 500;
         mMovingY = true;
             
     }
 
     if( ( currentKeyState[SDL_SCANCODE_A] ) && ( !mMovingXLeft ) )
     {
-        mVx = -mvmntSpeed;
+        mVx = -mVxInit;
         mTstartX = SDL_GetTicks();
         mXstart = mX;
         mMovingXLeft = true;
@@ -209,7 +183,7 @@ void Character::handleEvent( const Uint8 * currentKeyState )
     }
     else if( ( currentKeyState[SDL_SCANCODE_D] ) && ( !mMovingXRight ) )
     {
-        mVx = mvmntSpeed;
+        mVx = mVxInit;
         mTstartX = SDL_GetTicks();
         mXstart = mX;
         mMovingXRight = true;
@@ -226,14 +200,12 @@ void Character::handleEvent( const Uint8 * currentKeyState )
     }
 }
 
-void Character::render( SDL_Surface * surface )
+void Character::render( SDL_Renderer * renderer )
 {
+    mDestRect.x = (int)mX;
+    mDestRect.y = (int)mY - mCurrentSprite->rect.h;
+    mDestRect.w = mCurrentSprite->rect.w;
+    mDestRect.h = mCurrentSprite->rect.h;
 
-    dstRect.x = (int)mX;
-    dstRect.y = (int)mY - mCurrentSprite->rect.h;
-    dstRect.w = mCurrentSprite->rect.w;
-    dstRect.h = mCurrentSprite->rect.h;
-
-    SDL_BlitSurface( mCurrentSprite->spriteSheet, &mCurrentSprite->rect, surface, &dstRect );
-
+    SDL_RenderCopyEx( renderer, mCurrentSprite->spriteTexture, &mCurrentSprite->rect, &mDestRect, 0.0, nullptr, SDL_FLIP_NONE );
 }

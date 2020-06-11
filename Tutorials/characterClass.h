@@ -11,8 +11,6 @@ using namespace std;
 class Character
 {
 	public:
-
-
 		typedef enum
 		{
 			ACTION_STILL_LEFT,
@@ -22,21 +20,17 @@ class Character
 			ACTION_JUMP_LEFT,
 			ACTION_JUMP_RIGHT,
 			ACTION_COUNT
-
-
 		} action_id_t;
 
 
 		Character();
 		~Character();
 
-		Character( SDL_Surface * spriteSheet );
-
 		void calcState();
 
 		void handleEvent( const Uint8 * currentKeyState );
 
-		void render( SDL_Surface * surface  );
+		void render( SDL_Renderer * renderer  );
 
 		double getPosX() { return( mX ); }
 		double getPosY() { return( mY ); }
@@ -47,10 +41,16 @@ class Character
 		void setXLimit( int x ) { mYlimit = x; }
 		void setYLimit( int y ) { mYlimit = y; }
 
-		void addActionSprite( action_id_t actionId, SDL_Surface * spriteSheet, int x, int y, int w, int h );
+		void addActionSprite( action_id_t actionId, SDL_Texture * spriteTexture, int x, int y, int w, int h );
 	
 
 	private:
+
+		typedef struct
+		{
+			SDL_Rect        rect;
+			SDL_Texture   * spriteTexture;
+		} sprite_info_t;
 
 		double mX;
 		double mY;
@@ -65,7 +65,8 @@ class Character
 		double mXstart;
 		double mYstart;
 
-		double mvmntSpeed;
+		double mVxInit;
+		double mVyInit;
 
 		int mXlimit;
 		int mYlimit;
@@ -73,23 +74,13 @@ class Character
 		bool mMovingXRight;
 		bool mMovingXLeft;
 		bool mMovingY;
-
-		SDL_Rect dstRect;
-
 		bool mIsLeft;
 
-		typedef struct
-		{
-			SDL_Rect rect;
-			SDL_Surface * spriteSheet;
-		} sprite_info_t;
+		SDL_Rect mDestRect;
 
 		vector<sprite_info_t> mActionSprites[ACTION_COUNT];
-
 		vector<sprite_info_t>::iterator mCurrentSprite;
-
 		action_id_t mLastAction_id;
-
 };
 
 
