@@ -15,10 +15,6 @@
 *.so
 *.dylib
 
-# Fortran module files
-*.mod
-*.smod
-
 # Compiled Static libraries
 *.lai
 *.la
@@ -29,6 +25,7 @@
 *.app
 
 #Studio Files
+*.suo
 *.tlog
 *.vcxproj.user
 Debug/*
