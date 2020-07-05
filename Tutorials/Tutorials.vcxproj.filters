@@ -24,6 +24,9 @@
     <ClCompile Include="characterClass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="staticObjects.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="sdl-include\begin_code.h">
@@ -287,10 +290,8 @@
     <ClInclude Include="characterClass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <Image Include="images\nerd-whatsapp-emoji.bmp">
-      <Filter>Resource Files</Filter>
-    </Image>
+    <ClInclude Include="staticObjects.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

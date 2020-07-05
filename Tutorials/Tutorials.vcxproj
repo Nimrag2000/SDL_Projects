@@ -131,6 +131,7 @@
   <ItemGroup>
     <ClCompile Include="characterClass.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="staticObjects.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="characterClass.h" />
@@ -220,9 +221,7 @@
     <ClInclude Include="sdl-include\SDL_version.h" />
     <ClInclude Include="sdl-include\SDL_video.h" />
     <ClInclude Include="sdl-include\SDL_vulkan.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <Image Include="images\nerd-whatsapp-emoji.bmp" />
+    <ClInclude Include="staticObjects.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

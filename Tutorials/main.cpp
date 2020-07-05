@@ -4,6 +4,7 @@
 
 #include "SDL.h"
 #include "characterClass.h"
+#include "staticObjects.h"
 
 using namespace std;
 
@@ -44,11 +45,15 @@ static SDL_Renderer     * sRenderer         = nullptr;
 These are the sprite sheets that will be loaded into textures.
 */
 static SDL_Texture      * sTextureLuigi     = nullptr;
+static SDL_Texture      * sTextureMario     = nullptr;
+static SDL_Texture      * sTextureGround    = nullptr;
 
 static SDL_Joystick     * sGameController   = nullptr;
 
 static bool             sQuit               = false;
-static Character        sLuigi;
+static Character        * sLuigi            = nullptr;
+static Character        * sMario            = nullptr;
+static Object           * sGround           = nullptr;
 
 /*----------------------------------------------------------------------------
 Procedures
@@ -84,10 +89,26 @@ if( nullptr != sTextureLuigi )
     sTextureLuigi = nullptr;
 }
 
+if( nullptr != sTextureMario )
+{
+    SDL_DestroyTexture( sTextureMario );
+    sTextureMario = nullptr;
+}
+
+if( nullptr != sTextureGround )
+{
+    SDL_DestroyTexture( sTextureGround );
+    sTextureGround = nullptr;
+}
+
 SDL_DestroyRenderer( sRenderer );
 SDL_DestroyWindow( sWindow );
 sRenderer = nullptr;
 sWindow = nullptr;
+
+delete sLuigi;
+delete sMario;
+delete sGround;
 
 SDL_Quit();
 }   /* deinit() */
@@ -111,11 +132,7 @@ if( !SDL_SetHint( SDL_HINT_RENDER_SCALE_QUALITY, "1" ) )
     cout << "Warning: Linear texture filtering not enabled!\n";
 }
 
-if( SDL_NumJoysticks() < 1 )
-{
-    cout << "Warning: No controller connected!\n";
-}
-else
+if( SDL_NumJoysticks() >= 1 )
 {
     sGameController = SDL_JoystickOpen( 0 );
     if( sGameController == NULL )
@@ -156,6 +173,7 @@ static bool loadMedia
 SDL_Surface      * surface  = nullptr;
 
 
+
 /*
 Load the Luigi sprite sheet into a surface, then create a texture from it.
 */
@@ -172,20 +190,77 @@ if( nullptr == sTextureLuigi )
 
 SDL_FreeSurface( surface );
 
+
+/*
+Load the Mario sprite sheet into a surface, then create a texture from it.
+*/
+surface = SDL_LoadBMP( "images/marioSprite.bmp" );
+if( nullptr == surface )
+{
+    return( false );
+}
+sTextureMario = SDL_CreateTextureFromSurface( sRenderer, surface );
+if( nullptr == sTextureMario )
+{
+    return( false );
+}
+
+SDL_FreeSurface( surface );
+
+
+/*
+Load the Mario sprite sheet into a surface, then create a texture from it.
+*/
+surface = SDL_LoadBMP( "images/blockSprite.bmp" );
+if( nullptr == surface )
+{
+    return( false );
+}
+sTextureGround = SDL_CreateTextureFromSurface( sRenderer, surface );
+if( nullptr == sTextureGround )
+{
+    return( false );
+}
+
+SDL_FreeSurface( surface );
+
 /*
 Initialize the Luigi character with it's sprite actions.
 */
-sLuigi.setPos( 0, SCREEN_HEIGHT );
-sLuigi.addActionSprite( sLuigi.ACTION_STILL_LEFT,   sTextureLuigi, 181, 0, 13, 16 );
-sLuigi.addActionSprite( sLuigi.ACTION_STILL_RIGHT,  sTextureLuigi, 211, 0, 13, 16 );
-sLuigi.addActionSprite( sLuigi.ACTION_WALK_LEFT,    sTextureLuigi,  89, 0, 16, 16 );
-sLuigi.addActionSprite( sLuigi.ACTION_WALK_LEFT,    sTextureLuigi, 121, 0, 12, 16 );
-sLuigi.addActionSprite( sLuigi.ACTION_WALK_LEFT,    sTextureLuigi, 150, 0, 14, 16 );
-sLuigi.addActionSprite( sLuigi.ACTION_WALK_RIGHT,   sTextureLuigi, 300, 0, 16, 16 );
-sLuigi.addActionSprite( sLuigi.ACTION_WALK_RIGHT,   sTextureLuigi, 272, 0, 12, 16 );
-sLuigi.addActionSprite( sLuigi.ACTION_WALK_RIGHT,   sTextureLuigi, 241, 0, 14, 16 );
-sLuigi.addActionSprite( sLuigi.ACTION_JUMP_LEFT,    sTextureLuigi,  29, 0, 17, 16 );
-sLuigi.addActionSprite( sLuigi.ACTION_JUMP_RIGHT,   sTextureLuigi, 359, 0, 17, 16 );
+
+sLuigi = new Character( 0, 0, true );
+
+sLuigi->addActionSprite( sLuigi->ACTION_STILL_LEFT,   sTextureLuigi, 181, 0, 13, 16 );
+sLuigi->addActionSprite( sLuigi->ACTION_STILL_RIGHT,  sTextureLuigi, 211, 0, 13, 16 );
+sLuigi->addActionSprite( sLuigi->ACTION_WALK_LEFT,    sTextureLuigi,  89, 0, 16, 16 );
+sLuigi->addActionSprite( sLuigi->ACTION_WALK_LEFT,    sTextureLuigi, 121, 0, 12, 16 );
+sLuigi->addActionSprite( sLuigi->ACTION_WALK_LEFT,    sTextureLuigi, 150, 0, 14, 16 );
+sLuigi->addActionSprite( sLuigi->ACTION_WALK_RIGHT,   sTextureLuigi, 300, 0, 16, 16 );
+sLuigi->addActionSprite( sLuigi->ACTION_WALK_RIGHT,   sTextureLuigi, 272, 0, 12, 16 );
+sLuigi->addActionSprite( sLuigi->ACTION_WALK_RIGHT,   sTextureLuigi, 241, 0, 14, 16 );
+sLuigi->addActionSprite( sLuigi->ACTION_JUMP_LEFT,    sTextureLuigi,  29, 0, 17, 16 );
+sLuigi->addActionSprite( sLuigi->ACTION_JUMP_RIGHT,   sTextureLuigi, 359, 0, 17, 16 );
+
+
+sGround = new Object( sTextureGround, 83, 247, 70, 65, 0, 750 - 65 );
+
+if( sGameController != NULL )
+{
+    sMario = new Character( SCREEN_WIDTH - 20, 0, false );
+
+    sMario->addActionSprite( sMario->ACTION_STILL_LEFT,   sTextureMario, 181, 0, 13, 16 );
+    sMario->addActionSprite( sMario->ACTION_STILL_RIGHT,  sTextureMario, 211, 0, 13, 16 );
+    sMario->addActionSprite( sMario->ACTION_WALK_LEFT,    sTextureMario,  89, 0, 16, 16 );
+    sMario->addActionSprite( sMario->ACTION_WALK_LEFT,    sTextureMario, 121, 0, 12, 16 );
+    sMario->addActionSprite( sMario->ACTION_WALK_LEFT,    sTextureMario, 150, 0, 14, 16 );
+    sMario->addActionSprite( sMario->ACTION_WALK_RIGHT,   sTextureMario, 300, 0, 16, 16 );
+    sMario->addActionSprite( sMario->ACTION_WALK_RIGHT,   sTextureMario, 272, 0, 12, 16 );
+    sMario->addActionSprite( sMario->ACTION_WALK_RIGHT,   sTextureMario, 241, 0, 14, 16 );
+    sMario->addActionSprite( sMario->ACTION_JUMP_LEFT,    sTextureMario,  29, 0, 17, 16 );
+    sMario->addActionSprite( sMario->ACTION_JUMP_RIGHT,   sTextureMario, 359, 0, 17, 16 );
+
+}
+
 
 return( true );
 }   /* loadMedia() */
@@ -204,10 +279,15 @@ void pollEvent()
         {
             sQuit = true;
         }
+        const Uint8 * currentKeyState = SDL_GetKeyboardState( NULL );
+        sLuigi->handleEvent( currentKeyState, &e );
+        if( sMario != nullptr )
+        {
+            sMario->handleEvent( currentKeyState, &e );            
+        }
     }
 
-    const Uint8 * currentKeyState = SDL_GetKeyboardState( NULL );
-    sLuigi.handleEvent( currentKeyState );
+    
 }
 
 /*----------------------------------------------------------------------------
@@ -229,18 +309,34 @@ if( ( false == init()      ) ||
 while( !sQuit )
 {
     pollEvent();
-    sLuigi.calcState();
+    sLuigi->calcState();
+
+    if( sMario != nullptr )
+    {
+        sMario->calcState();            
+    }
+
 
 	/*
     Clear the screen.
     */
-	SDL_SetRenderDrawColor( sRenderer, 0, 0, 0, 0 );
+	SDL_SetRenderDrawColor( sRenderer, 0, 0, 64, 0 );
 	SDL_RenderClear( sRenderer );
 
     /*
     Update the characters.
     */
-    sLuigi.render( sRenderer );
+
+    //sGround->render( sRenderer );
+
+
+    sLuigi->render( sRenderer );
+
+    if( sMario != nullptr )
+    {
+        sMario->render( sRenderer );            
+    }
+
 
 	/*
     Update the screen.

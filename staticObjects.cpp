@@ -3,7 +3,7 @@
 #include <string>
 
 #include "SDL.h"
-#include "characterClass.h"
+#include "staticObjects.h"
 
 using namespace std;
 

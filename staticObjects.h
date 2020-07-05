@@ -111,3 +111,4 @@ class Character
 
 
 #endif /* CIRCLE_H_ */
+
