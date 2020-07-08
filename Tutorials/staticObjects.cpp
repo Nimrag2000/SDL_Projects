@@ -31,6 +31,9 @@ Object::~Object( void )
 
 void Object::render( SDL_Renderer * renderer )
 {
-    SDL_RenderCopy( renderer, mTexture, &mSrcRect, &mDestRect );
+    SDL_Rect tempRect = mDestRect;
+    
+    tempRect.y -= mDestRect.h;
+    SDL_RenderCopy( renderer, mTexture, &mSrcRect, &tempRect );
 }
 

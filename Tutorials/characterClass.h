@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <vector>
 #include "SDL.h"
+#include "staticObjects.h"
 
 using namespace std;
 
@@ -46,8 +47,12 @@ class Character
 
 		void render( SDL_Renderer * renderer  );
 
-		double getPosX() { return( mX ); }
-		double getPosY() { return( mY ); }
+		double getPosX()   { return( mX ); }
+		double getPosY()   { return( mY ); }
+		int    getTop()    { return( (int)mY - mCurrentSprite->rect.h ); }
+		int    getBot()    { return( (int)mY ); }
+		int    getLeft()   { return( (int)mX ); }
+		int    getRight()  { return( (int)mX + mCurrentSprite->rect.w ); }
 
 		void setPosX( double x ) { mX = x; }
 		void setPosY( double y ) { mY = y; }
@@ -58,6 +63,8 @@ class Character
 		void addActionSprite( action_id_t actionId, SDL_Texture * spriteTexture, int x, int y, int w, int h );
 
 		void controller();
+
+		void detectCollision( vector<Object> blocks );
 	
 
 	private:

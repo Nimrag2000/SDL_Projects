@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <iostream>
 #include <string>
+#include <vector>
 
 #include "SDL.h"
 #include "characterClass.h"
@@ -53,7 +54,7 @@ static SDL_Joystick     * sGameController   = nullptr;
 static bool             sQuit               = false;
 static Character        * sLuigi            = nullptr;
 static Character        * sMario            = nullptr;
-static Object           * sGround           = nullptr;
+static vector<Object>     sGround;
 
 /*----------------------------------------------------------------------------
 Procedures
@@ -108,7 +109,6 @@ sWindow = nullptr;
 
 delete sLuigi;
 delete sMario;
-delete sGround;
 
 SDL_Quit();
 }   /* deinit() */
@@ -171,7 +171,7 @@ static bool loadMedia
     )
 {
 SDL_Surface      * surface  = nullptr;
-
+Object             ground;
 
 
 /*
@@ -241,8 +241,30 @@ sLuigi->addActionSprite( sLuigi->ACTION_WALK_RIGHT,   sTextureLuigi, 241, 0, 14,
 sLuigi->addActionSprite( sLuigi->ACTION_JUMP_LEFT,    sTextureLuigi,  29, 0, 17, 16 );
 sLuigi->addActionSprite( sLuigi->ACTION_JUMP_RIGHT,   sTextureLuigi, 359, 0, 17, 16 );
 
+ground.setTexture( sTextureGround );
+ground.setSrcPos( 49, 145, 35, 33 );
 
-sGround = new Object( sTextureGround, 83, 247, 70, 65, 0, 750 - 65 );
+for( int i = 0; i < 750; i += 35 )
+{
+    ground.setDestPos( i, 750, 35, 33 );
+    sGround.push_back( ground );
+
+}
+
+ground.setSrcPos( 347, 142, 36, 36 );
+
+ground.setDestPos( 125, 717, 36, 36 );
+sGround.push_back( ground );
+
+ground.setDestPos( 160, 717, 36, 36 );
+sGround.push_back( ground );
+
+ground.setDestPos( 160, 684, 36, 36 );
+sGround.push_back( ground );
+
+ground.setSrcPos( 134, 142, 36, 36 );
+ground.setDestPos( 200, 654, 36, 36 );
+sGround.push_back( ground );
 
 if( sGameController != NULL )
 {
@@ -260,6 +282,7 @@ if( sGameController != NULL )
     sMario->addActionSprite( sMario->ACTION_JUMP_RIGHT,   sTextureMario, 359, 0, 17, 16 );
 
 }
+
 
 
 return( true );
@@ -299,6 +322,8 @@ int main
     char   *args[]
     )
 {
+vector<Object>::iterator itGround;
+
 
 if( ( false == init()      ) ||
     ( false == loadMedia() ) )
@@ -310,12 +335,15 @@ while( !sQuit )
 {
     pollEvent();
     sLuigi->calcState();
+    
 
     if( sMario != nullptr )
     {
         sMario->calcState();            
     }
 
+    sLuigi->detectCollision( sGround );
+    sMario->detectCollision( sGround );
 
 	/*
     Clear the screen.
@@ -327,8 +355,10 @@ while( !sQuit )
     Update the characters.
     */
 
-    //sGround->render( sRenderer );
-
+    for( itGround = sGround.begin(); itGround != sGround.end(); itGround++ )
+    {
+        itGround->render( sRenderer );     
+    }
 
     sLuigi->render( sRenderer );
 
@@ -336,6 +366,8 @@ while( !sQuit )
     {
         sMario->render( sRenderer );            
     }
+
+
 
 
 	/*

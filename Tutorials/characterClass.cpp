@@ -1,9 +1,11 @@
 #include <stdio.h>
 #include <iostream>
 #include <string>
+#include <vector>
 
 #include "SDL.h"
 #include "characterClass.h"
+#include "staticObjects.h"
 
 using namespace std;
 
@@ -202,7 +204,7 @@ void Character::calcState()
 void Character::handleEvent( const Uint8 * currentKeyState, SDL_Event * event )
 {
     
-    if( ( mIsKeyboard && currentKeyState[SDL_SCANCODE_W] && !mMovingY ) ||
+    if( ( mIsKeyboard && currentKeyState[SDL_SCANCODE_SPACE] && !mMovingY ) ||
         ( !mIsKeyboard && event->type == SDL_JOYBUTTONDOWN && event->jbutton.button == CONTROLLER_ID_X && !mMovingY ) )
     {
         mVy = mVyInit;
@@ -213,7 +215,7 @@ void Character::handleEvent( const Uint8 * currentKeyState, SDL_Event * event )
         mG = 0;
     }
     else if( ( mTstartJump != 0 ) &&
-             ( ( mIsKeyboard && !currentKeyState[SDL_SCANCODE_W] && mMovingY ) ||
+             ( ( mIsKeyboard && !currentKeyState[SDL_SCANCODE_SPACE] && mMovingY ) ||
                ( !mIsKeyboard && event->type == SDL_JOYBUTTONUP && event->jbutton.button == CONTROLLER_ID_X && mMovingY ) ) )
     {
         mVy = mVyInit;
@@ -224,7 +226,7 @@ void Character::handleEvent( const Uint8 * currentKeyState, SDL_Event * event )
     }
     else if( ( (SDL_GetTicks() - mTstartJump) >= 250 ) && ( mTstartJump != 0 ) && mMovingY )
     {
-        mVy = mVyInit * 1.5;
+       // mVy = mVyInit * 1.5;
         mTstarty = SDL_GetTicks();
         mYstart = mY;
         mTstartJump = 0;
@@ -296,3 +298,27 @@ void Character::render( SDL_Renderer * renderer )
     //SDL_RenderCopyEx( renderer, mCurrentSprite->spriteTexture, &mCurrentSprite->rect, &mDestRect, (SDL_GetTicks()) % 360, nullptr, SDL_FLIP_NONE );
 }
 
+void Character::detectCollision( vector<Object> blocks )
+{
+    vector<Object>::iterator itBlocks;
+
+    for( itBlocks = blocks.begin(); itBlocks != blocks.end(); itBlocks++ )
+    {
+        if( ( this->getBot() > itBlocks->getTop() ) && ( this->getTop() < itBlocks->getTop() ) ) 
+        {
+            if( ( this->getLeft() > itBlocks->getLeft() ) && ( this->getLeft() < itBlocks->getRight() ) || 
+                ( this->getRight() > itBlocks->getLeft() ) && ( this->getRight() < itBlocks->getRight() ) ||
+                ( itBlocks->getLeft() > this->getLeft() ) && ( itBlocks->getLeft() < this->getRight() ) ||
+                ( itBlocks->getRight() > this->getLeft() ) && ( itBlocks->getRight() < this->getRight() ) )
+            {
+                mVy = 0;
+                mG  = mINIT_G;
+                mMovingY = false;
+                mTstarty = SDL_GetTicks();
+                mTstartJump = 0;
+                mY = itBlocks->getTop();
+                mYstart = mY;
+            }
+        }
+    }
+}
